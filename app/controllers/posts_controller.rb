@@ -1,8 +1,17 @@
 class PostsController < ApplicationController
   before_filter :authenticate_user!
   expose_decorated(:posts) { Post.all }
+  #expose_decorated(:posts) { Post.all.sort_by { |o| o.hotness } }
   expose_decorated(:post, attributes: :post_params)
-  expose(:tag_cloud) { [] }
+  expose(:tag_cloud) { Post.tags_with_weight }
+  expose(:comments, ancestor: :post) {
+    if current_user == post.user
+      post.comments
+      #Comment.where(post: post)
+    else
+      post.comments.nonabusive
+    end
+  }
 
   def index
   end
@@ -36,6 +45,7 @@ class PostsController < ApplicationController
   end
 
   def create
+    post.user = current_user
     if post.save
       redirect_to action: :index
     else

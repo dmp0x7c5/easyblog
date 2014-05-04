@@ -11,3 +11,5 @@
     %li.post--short-size
       .post__title= link_to post.title, post_path(post)
       .post__body= post.truncated_body
+      %i hotness:
+      = post.hotness()

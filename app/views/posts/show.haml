@@ -1,12 +1,41 @@
+%div.post__tags-list.tagsinput
+  - post.tags_array.each do |tag|
+    = content_tag :span, tag, class: 'tag'
+
 .post--full-size
   %h2
     = post.title
     %small
-      = post.created_at
+      = post.friendly_date
   = link_to "edit", edit_post_path(post), class: 'post__button--edit'
 
   .post__body
     = post.body
-  .post__tags-list.tagsinput
-    - post.tags_array.each do |tag|
-      = content_tag :span, tag, class: 'tag'
+
+%div
+  - comments.each do |comment|
+    %div
+      %span
+        %b
+          = comment.user.name
+        %i says
+        = comment.body
+        = link_to 'vote_up', vote_up_post_comment_path(comment.post_id, comment.id), data: { confirm: 'Vote up selected comment?' }
+        = link_to 'vote_down', vote_down_post_comment_path(comment.post_id, comment.id), data: { confirm: 'Vote down selected comment?' }
+        %i like:
+        = comment.likes
+        %i dislike:
+        = comment.dislikes
+        <!-- %i abusive: -->
+        <!-- = comment.abusive -->
+        - if comment.abusive
+          = link_to 'mark_as_not_abusive', mark_as_not_abusive_post_comment_path(comment.post_id, comment.id), data: { confirm: 'Mark selected comment as not abusive?' }
+
+%div
+  = simple_form_for [post, post.comments.build], html: { class: "form-horizontal" }  do |f|
+    %h4 add comment
+    %span as user called
+    %b
+      = current_user.name
+    = f.input :body, as: :text, input_html: { cols: 100, rows: 1 }
+    = f.button :submit
