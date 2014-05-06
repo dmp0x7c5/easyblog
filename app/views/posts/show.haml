@@ -1,41 +1,48 @@
-%div.post__tags-list.tagsinput
-  - post.tags_array.each do |tag|
-    = content_tag :span, tag, class: 'tag'
 
 .post--full-size
   %h2
     = post.title
     %small
       = post.friendly_date
+    %small
+      = 'by ' + post.user.name 
   = link_to "edit", edit_post_path(post), class: 'post__button--edit'
 
   .post__body
     = post.body
 
-%div
-  - comments.each do |comment|
-    %div
-      %span
+
+  %div
+    %p
+      %b <<< Comments >>>
+    - comments.each do |comment|
+      %p
         %b
           = comment.user.name
         %i says
         = comment.body
-        = link_to 'vote_up', vote_up_post_comment_path(comment.post_id, comment.id), data: { confirm: 'Vote up selected comment?' }
-        = link_to 'vote_down', vote_down_post_comment_path(comment.post_id, comment.id), data: { confirm: 'Vote down selected comment?' }
-        %i like:
-        = comment.likes
-        %i dislike:
-        = comment.dislikes
-        <!-- %i abusive: -->
-        <!-- = comment.abusive -->
+        %br
+        = link_to '↑', vote_up_post_comment_path(comment.post_id, comment.id), class: 'post__button--edit', data: { confirm: 'Vote up selected comment?' }
+        = '+' + comment.likes.to_s
+        %b vs
+        = '-' + comment.dislikes.to_s
+        = link_to '↓', vote_down_post_comment_path(comment.post_id, comment.id), class: 'post__button--edit' , data: { confirm: 'Vote down selected comment?' }
+
         - if comment.abusive
           = link_to 'mark_as_not_abusive', mark_as_not_abusive_post_comment_path(comment.post_id, comment.id), data: { confirm: 'Mark selected comment as not abusive?' }
 
-%div
-  = simple_form_for [post, post.comments.build], html: { class: "form-horizontal" }  do |f|
-    %h4 add comment
-    %span as user called
-    %b
-      = current_user.name
-    = f.input :body, as: :text, input_html: { cols: 100, rows: 1 }
-    = f.button :submit
+    = form_for [post, post.comments.build] do |f|
+      %p
+        as user called
+        %b
+          = current_user.name + ':'
+      = f.text_area :body, size: '72x1'
+
+      = f.button 'add comment', class: 'post__button--edit'
+
+
+%p
+  %b <<< Tags >>>
+%div.post__tags-list.tagsinput
+  - post.tags_array.each do |tag|
+    = content_tag :span, tag, class: 'tag'
